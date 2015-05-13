@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	beanstalk "github.com/JalfResi/gobeanstalk"
 	"gopkg.in/yaml.v2"
 )
@@ -36,7 +34,7 @@ func (as *ArticleSupplier) SetSrcTube(srcTube string) {
 }
 
 func (as *ArticleSupplier) Done(au *ArticleURL) {
-	as.bsConn.Release(au.job.ID, uint32(au.stats.Pri), time.Duration(au.stats.Delay)*time.Second)
+	as.bsConn.Delete(au.job.ID)
 }
 
 func (as *ArticleSupplier) GetArticleURL() *ArticleURL {

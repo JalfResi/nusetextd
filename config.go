@@ -22,17 +22,37 @@ import (
 
 type NusefeedConfig struct {
 	sync.Mutex
-	verbose            bool
-	configTest         bool
-	debug              bool
-	srcTube            string
-	destTube           string
-	beanstalkdHost     string
-	memcachedbHost     string
-	maxRetryAttempts   uint64
-	timeout            int
-	initialWorkerCount int
-	textRazorAPIKey    string
+	verbose             bool
+	configTest          bool
+	debug               bool
+	srcTube             string
+	destTube            string
+	beanstalkdHost      string
+	memcachedbHost      string
+	maxRetryAttempts    uint64
+	timeout             int
+	initialWorkerCount  int
+	totalRequestLimit   int
+	currentRequestCount int
+	textRazorAPIKey     string
+}
+
+func (c *NusefeedConfig) IncRequestCount() {
+	c.Lock()
+	defer c.Unlock()
+	c.currentRequestCount++
+}
+
+func (c *NusefeedConfig) RequestCount() int {
+	c.Lock()
+	defer c.Unlock()
+	return c.currentRequestCount
+}
+
+func (c *NusefeedConfig) RequestLimitMet() bool {
+	c.Lock()
+	defer c.Unlock()
+	return (c.currentRequestCount >= c.totalRequestLimit)
 }
 
 var config *NusefeedConfig = &NusefeedConfig{}
@@ -50,7 +70,8 @@ func init() {
 	flag.StringVar(&config.memcachedbHost, "memcache", "127.0.0.1:11211", "The memcache host")
 	flag.Uint64Var(&config.maxRetryAttempts, "max-fetch-retries", 3, "The maximum number of attempts to fetch a feed url")
 	flag.IntVar(&config.timeout, "timeout", 30, "The http connection timeout")
-	flag.IntVar(&config.initialWorkerCount, "workers", 100, "The initial worker count")
+	flag.IntVar(&config.initialWorkerCount, "workers", 2, "The initial worker count")
+	flag.IntVar(&config.totalRequestLimit, "requests", 500, "The maximum TextRazor requests in a 24hr period")
 	flag.StringVar(&config.textRazorAPIKey, "key", "014dd0eee816fa4938f2364251273bc93c8ac0d04410ca8187676b88", "The TextRazor API key")
 
 	flagenv.UseUpperCaseFlagNames = true

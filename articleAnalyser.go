@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"time"
 )
 
 // Connects to TextRazor and outputs the returned result
 // in an AnalysisReport
+
+var requestLimitMet = errors.New("Request limit met")
 
 type ArticleAnalyser interface {
 	Analyse(u *ArticleURL) *TopicsReport
@@ -23,7 +26,12 @@ func NewAnalyser(key string) *Analyser {
 	}
 }
 
-func (a *Analyser) Analyse(u *ArticleURL) *TopicsReport {
+func (a *Analyser) Analyse(u *ArticleURL) (*TopicsReport, error) {
+
+	if config.RequestLimitMet() {
+		return nil, requestLimitMet
+	}
+
 	c := NewTimeoutClient(time.Duration(config.timeout) * time.Second)
 
 	tr := NewTextRazorRequest(a.apiKey)
@@ -36,8 +44,9 @@ func (a *Analyser) Analyse(u *ArticleURL) *TopicsReport {
 
 	r, err := tr.Analysis(c)
 	if err != nil {
-		logError.Fatal(err)
+		return nil, err
 	}
 
-	return NewTopicsReport(r)
+	config.IncRequestCount()
+	return NewTopicsReport(r), nil
 }

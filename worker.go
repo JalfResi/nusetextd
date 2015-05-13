@@ -48,7 +48,22 @@ func (w Worker) DoWork(c *WorkerConfig) {
 
 	for {
 		article := as.GetArticleURL()
-		report := aa.Analyse(article)
+		report, err := aa.Analyse(article)
+		if err != nil {
+			if err == requestLimitMet {
+				logError.Printf("%s: %d\n", err, config.totalRequestLimit)
+				w.DieGracefully()
+				// should possibly wait until the next day
+				// reset the config.currentRequestCount and
+				// start up the number of workers to continue
+				// for the next day?
+				return
+			}
+			logError.Println(err)
+			// Possibly bury continuinly failing jobs?
+			as.Done(article)
+			continue
+		}
 		as.Done(article)
 		rr.StoreTopicsReport(report)
 	}
