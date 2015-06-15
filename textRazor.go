@@ -66,6 +66,7 @@ func (t *TextRazorRequest) Analysis(client *http.Client) (*TextRazorResult, erro
 		return nil, err
 	}
 	s := v.Encode()
+	logInfo.Println(s)
 
 	req, err := http.NewRequest("POST", "https://api.textrazor.com/", bytes.NewBufferString(s))
 	if err != nil {

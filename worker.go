@@ -57,15 +57,30 @@ func (w Worker) DoWork(c *WorkerConfig) {
 				// reset the config.currentRequestCount and
 				// start up the number of workers to continue
 				// for the next day?
+				//
+				// What do we do about articleUrls that may be building up in
+				// beanstalkd? Should we bin off old (i.e. yesterday)
+				// article urls to deal with the backlog? Maybe we can
+				// bury them? (but then how do we deal with the bury list?)
 				return
 			}
-			logError.Println(err)
+
+			if err.Error() == "Unauthorized" {
+				as.Retry(article)
+				logInfo.Printf("Got '%s' from TextRazor. Retrying\n", err)
+				continue
+			}
+
+			logError.Printf("%+v %T\n", err, err)
 			// Possibly bury continuinly failing jobs?
 			as.Done(article)
 			continue
 		}
 		as.Done(article)
-		rr.StoreTopicsReport(report)
+		err = rr.StoreTopicsReport(report)
+		if err != nil {
+			logError.Println(err)
+		}
 	}
 }
 

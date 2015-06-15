@@ -37,6 +37,10 @@ func (as *ArticleSupplier) Done(au *ArticleURL) {
 	as.bsConn.Delete(au.job.ID)
 }
 
+func (as *ArticleSupplier) Retry(au *ArticleURL) {
+	as.bsConn.Release(au.job.ID, 1, 0)
+}
+
 func (as *ArticleSupplier) GetArticleURL() *ArticleURL {
 	for {
 		job, err := as.bsConn.Reserve()
@@ -89,13 +93,6 @@ func (as *ArticleSupplier) getJobTTR(job *beanstalk.Job) *StatsJob {
 // Uses globals! Naughty!
 func (as *ArticleSupplier) increaseJobTTR(job *beanstalk.Job, stats *StatsJob, newTTR int) {
 	as.bsConn.Use(config.srcTube)
-
-	// Urgh! Race condition!
-	// TODO:
-	// Swap these two statments around to solve the race condition
-	// as putUnique will prevent duplicates if failure before delete
-	as.bsConn.Delete(job.ID)
 	as.bsConn.PutUnique(job.Body, stats.Pri, 1, newTTR) // We can set the delay to 1 because the delay is already up and will be reset when we crawl the feed
-
-	as.bsConn.Use(config.destTube)
+	as.bsConn.Delete(job.ID)
 }

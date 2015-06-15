@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -22,7 +24,7 @@ type Analyser struct {
 func NewAnalyser(key string) *Analyser {
 	return &Analyser{
 		apiKey:            key,
-		downloadUserAgent: "NuseAgent Article Downloader v1.0 (http://nuseagent.com/)",
+		downloadUserAgent: fmt.Sprintf("NuseAgent Article Downloader v1.0 (%s)", url.QueryEscape("http://nuseagent.com/")),
 	}
 }
 
@@ -48,5 +50,5 @@ func (a *Analyser) Analyse(u *ArticleURL) (*TopicsReport, error) {
 	}
 
 	config.IncRequestCount()
-	return NewTopicsReport(r), nil
+	return NewTopicsReport(tr, r), nil
 }

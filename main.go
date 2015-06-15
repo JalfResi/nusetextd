@@ -30,7 +30,6 @@ func main() {
 		fmt.Printf("debug: %+v\n", config.debug)
 		fmt.Printf("config-test: %+v\n", config.configTest)
 		fmt.Printf("src-tube: %+v\n", config.srcTube)
-		fmt.Printf("dest-tube: %+v\n", config.destTube)
 		fmt.Printf("beanstalkd: %+v\n", config.beanstalkdHost)
 		fmt.Printf("memcachedb: %+v\n", config.memcachedbHost)
 		fmt.Printf("max-fetch-retries: %+v\n", config.maxRetryAttempts)
@@ -41,10 +40,6 @@ func main() {
 
 	if config.verbose {
 		logInfo = log.New(os.Stdout, LOG_PREFIX_INFO, log.Ldate|log.Ltime)
-	}
-
-	if config.destTube == "" || config.destTube == "default" {
-		logError.Fatal("Must specify destTube other than default")
 	}
 
 	if config.debug {
