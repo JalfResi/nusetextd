@@ -35,7 +35,7 @@ func (rr *ReportRecorder) StoreTopicsReport(r *TopicsReport) error {
 	// | TopicHash | Label |
 	//
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", "root", "", "127.0.0.1", "nuseagent")
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", "nusetext", "10rapid", "163.172.149.161", "nuseagent")
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return err
