@@ -71,5 +71,5 @@ func main() {
 	   log.Printf("Running %d workers\n", stack.Len())
 	*/
 
-	<-quit // This will eventually be replaced with the command server
+	<-quit
 }
