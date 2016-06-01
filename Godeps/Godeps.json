@@ -1,0 +1,28 @@
+{
+	"ImportPath": "github.com/JalfResi/nusetextd",
+	"GoVersion": "go1.6",
+	"Deps": [
+		{
+			"ImportPath": "github.com/JalfResi/flagenv",
+			"Rev": "b4fef77adf6a06854f0feba13bf5d97ffad16158"
+		},
+		{
+			"ImportPath": "github.com/JalfResi/gobeanstalk",
+			"Comment": "v0.3-10-g80a3454",
+			"Rev": "80a34547ab301d3b9921ea0f6cc546a760945002"
+		},
+		{
+			"ImportPath": "github.com/go-sql-driver/mysql",
+			"Comment": "v1.0.1",
+			"Rev": "75bb76ec381d160c6b119bd8004a12979b0f2008"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "547ef5ac979778feb2f760cdb5f4eae1a2207b86"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "b6b591a3c0ec0452719f4d4555a3e084fd9f12fb"
+		}
+	]
+}
