@@ -22,6 +22,8 @@ var (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+    fmt.Printf("NuseText is starting...\n")
+
 	if config.configTest {
 		flag.PrintDefaults()
 
