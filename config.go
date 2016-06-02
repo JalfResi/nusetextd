@@ -71,7 +71,7 @@ func init() {
 	flag.IntVar(&config.timeout, "timeout", 30, "The http connection timeout")
 	flag.IntVar(&config.initialWorkerCount, "workers", 2, "The initial worker count")
 	flag.IntVar(&config.totalRequestLimit, "requests", 500, "The maximum TextRazor requests in a 24hr period")
-	flag.StringVar(&config.textRazorAPIKey, "key", "014dd0eee816fa4938f2364251273bc93c8ac0d04410ca8187676b88", "The TextRazor API key")
+	flag.StringVar(&config.textRazorAPIKey, "key", "", "The TextRazor API key")
 
 	flagenv.Prefix = "NUSETEXT_"
 	flagenv.Parse()
