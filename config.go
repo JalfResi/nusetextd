@@ -18,7 +18,7 @@ import (
 )
 
 // This must be mutex locked as multiple connections could be
-// modifying the config options over the command connection
+// modifying the config options
 
 type NusefeedConfig struct {
 	sync.Mutex
