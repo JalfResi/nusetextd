@@ -13,7 +13,7 @@ import (
 var requestLimitMet = errors.New("Request limit met")
 
 type ArticleAnalyser interface {
-	Analyse(u *ArticleURL) *TopicsReport
+	Analyse(u *ArticleURL) *TextRazorResult
 }
 
 type Analyser struct {
@@ -28,7 +28,7 @@ func NewAnalyser(key string) *Analyser {
 	}
 }
 
-func (a *Analyser) Analyse(u *ArticleURL) (*TopicsReport, error) {
+func (a *Analyser) Analyse(u *ArticleURL) (*TextRazorResult, error) {
 
 	if config.RequestLimitMet() {
 		return nil, requestLimitMet
@@ -38,17 +38,20 @@ func (a *Analyser) Analyse(u *ArticleURL) (*TopicsReport, error) {
 
 	tr := NewTextRazorRequest(a.apiKey)
 	tr.DownloadUserAgent = a.downloadUserAgent
-	tr.Url = u.String()
-	tr.CleanupMode = MODE_CLEANHTML
+	tr.URL = u.String()
+	tr.CleanupMode = ModeCleanHTML
 	tr.CleanupReturnCleaned = false
 	tr.CleanupReturnRaw = false
-	tr.SetExtractors(EXTRACTOR_TOPICS)
+	tr.SetExtractors(
+		ExtractorTopics,
+		ExtractorEntities,
+		ExtractorWords,
+		ExtractorPhrases,
+		ExtractorDependancyTrees,
+		ExtractorRelations,
+		ExtractorEntailments,
+		ExtractorSenses,
+	)
 
-	r, err := tr.Analysis(c)
-	if err != nil {
-		return nil, err
-	}
-
-	config.IncRequestCount()
-	return NewTopicsReport(tr, r), nil
+	return tr.Analysis(c)
 }

@@ -7,11 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// Stores an AnalysisReport in a MySQL table
-
-type ReportRecorderer interface {
-	StoreReport(r *TopicsReport)
-}
+// Stores an TextRazorResult in a MySQL table
 
 type ReportRecorder struct {
 	db *sql.DB
@@ -22,15 +18,15 @@ func NewReportRecorder(mysqlHost, mysqlUsername, mysqlPassword string) *ReportRe
 }
 
 // If there is an error executing any of the inserts, all pervious inserts
-// for this TopicsReport is reolledback, ensuring we dont have a partial
-// topicReport written to the database.
-func (rr *ReportRecorder) StoreTopicsReport(r *TopicsReport) error {
-	// Should be able to get the article url from the TopicsReport
+// for this TextRazorResult is reolledback, ensuring we dont have a partial
+// TextRazorResult written to the database.
+func (rr *ReportRecorder) StoreTopics(r *TextRazorResult) error {
+	// Should be able to get the article url from the TextRazorResult
 	// write this into MySQL linking table:
 	//
-	// | articleUrlHash | articleUrl |
+	// | articleURLHash | articleUrl |
 	//
-	// | articleUrlHash | TopicHash |
+	// | articleURLHash | TopicHash |
 	//
 	// | TopicHash | Label |
 	//
@@ -70,30 +66,33 @@ func (rr *ReportRecorder) StoreTopicsReport(r *TopicsReport) error {
 	}
 	defer stmtArticlesHasTopics.Close()
 
-	for _, topic := range r.topics {
+	for _, topic := range r.Response.Topics {
 
-		articleUrlHash := generateHash(r.url)
-		topicHash := generateHash(topic)
+		if topic.Score == 1.0 {
 
-		_, err = stmtArticles.Exec(articleUrlHash, r.url)
-		if err != nil {
-			tx.Rollback()
-			return err
+			articleURLHash := generateHash(r.URL)
+			topicHash := generateHash(topic.Label)
+
+			_, err = stmtArticles.Exec(articleURLHash, r.URL)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			_, err = stmtTopics.Exec(topicHash, topic)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			_, err = stmtArticlesHasTopics.Exec(articleURLHash, topicHash)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			fmt.Println(topic)
 		}
-
-		_, err = stmtTopics.Exec(topicHash, topic)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		_, err = stmtArticlesHasTopics.Exec(articleUrlHash, topicHash)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		fmt.Println(topic)
 	}
 
 	tx.Commit()

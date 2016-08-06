@@ -14,33 +14,33 @@ import (
 
 // extractor constants
 const (
-	EXTRACTOR_ENTITIES        string = "entities"
-	EXTRACTOR_TOPICS          string = "topics"
-	EXTRACTOR_WORDS           string = "words"
-	EXTRACTOR_PHRASES         string = "phrases"
-	EXTRACTOR_DEPENDENCYTREES string = "dependency-trees"
-	EXTRACTOR_RELATIONS       string = "relations"
-	EXTRACTOR_ENTAILMENTS     string = "entailments"
-	EXTRACTOR_SENSES          string = "senses"
+	ExtractorEntities        string = "entities"
+	ExtractorTopics          string = "topics"
+	ExtractorWords           string = "words"
+	ExtractorPhrases         string = "phrases"
+	ExtractorDependancyTrees string = "dependency-trees"
+	ExtractorRelations       string = "relations"
+	ExtractorEntailments     string = "entailments"
+	ExtractorSenses          string = "senses"
 )
 
 // cleanup mode constants
 const (
-	MODE_RAW       string = "raw"
-	MODE_STRIPTAGS string = "stripTags"
-	MODE_CLEANHTML string = "cleanHTML"
+	ModeRaw       string = "raw"
+	ModeStripTags string = "stripTags"
+	ModeCleanHTML string = "cleanHTML"
 )
 
 var (
-	httpBadRequest      = errors.New("Bad Request")
-	httpUnauthorized    = errors.New("Unauthorized")
-	httpRequestTooLarge = errors.New("Request Too Large")
+	ErrHTTPBadRequest            = errors.New("Bad Request")
+	ErrHTTPUnauthorized          = errors.New("Unauthorized")
+	ErrHTTPRequestEntityTooLarge = errors.New("Request Entity Too Large")
 )
 
 type TextRazorRequest struct {
 	Text                 string `form:"text,omitempty"                url:"text,omitempty"                yaml:"text,omitempty"`
-	Url                  string `form:"url,omitempty"                 url:"url,omitempty"                 yaml:"url,omitempty"`
-	ApiKey               string `form:"apiKey"                        url:"apiKey"                        yaml:"apiKey,omitempty"`     // required field
+	URL                  string `form:"url,omitempty"                 url:"url,omitempty"                 yaml:"url,omitempty"`
+	APIKey               string `form:"apiKey"                        url:"apiKey"                        yaml:"apiKey,omitempty"`     // required field
 	Extractors           string `form:"extractors,omitempty"          url:"extractors,omitempty"          yaml:"extractors,omitempty"` // use extractor constants
 	Rules                string `form:"rules,omitempty"               url:"rules,omitempty"               yaml:"rules,omitempty"`
 	CleanupMode          string `form:"cleanup.mode,omitempty"        url:"cleanup.mode,omitempty"        yaml:"cleanup.mode,omitempty"` // cleanup mode constants
@@ -56,7 +56,7 @@ type TextRazorRequest struct {
 
 func NewTextRazorRequest(key string) *TextRazorRequest {
 	return &TextRazorRequest{
-		ApiKey: key,
+		APIKey: key,
 	}
 }
 
@@ -85,6 +85,7 @@ func (t *TextRazorRequest) Analysis(client *http.Client) (*TextRazorResult, erro
 	}
 
 	var tr TextRazorResult
+	tr.URL = t.URL
 	err = json.Unmarshal(data, &tr)
 	if err != nil {
 		logInfo.Printf("%s\n", data)
@@ -92,12 +93,12 @@ func (t *TextRazorRequest) Analysis(client *http.Client) (*TextRazorResult, erro
 	}
 
 	switch resp.StatusCode {
-	case 400:
-		return nil, httpBadRequest
-	case 401:
-		return nil, httpUnauthorized
-	case 413:
-		return nil, httpRequestTooLarge
+	case http.StatusBadRequest:
+		return nil, ErrHTTPBadRequest
+	case http.StatusUnauthorized:
+		return nil, ErrHTTPUnauthorized
+	case http.StatusRequestEntityTooLarge:
+		return nil, ErrHTTPRequestEntityTooLarge
 	}
 
 	if !tr.Ok {
@@ -120,6 +121,7 @@ func (t *TextRazorRequest) SetExtractors(e ...string) {
 }
 
 type TextRazorResult struct {
+	URL              string
 	Time             float64
 	Response         TextRazorResponse
 	Ok               bool
@@ -145,12 +147,12 @@ type TextRazorResponse struct {
 }
 
 type TypeRazorEntity struct {
-	EntityId        string
-	EntityEnglishId string
+	EntityID        string
+	EntityEnglishID string
 	ConfidenceScore float64
 	Type            string
 	FreebaseTypes   string
-	FreebaseId      string
+	FreebaseID      string
 	MatchingTokens  string
 	MatchedText     string
 	Data            string
@@ -159,7 +161,7 @@ type TypeRazorEntity struct {
 }
 
 type TextRazorTopic struct {
-	Id       int
+	ID       int
 	Label    string
 	Score    float64
 	WikiLink string

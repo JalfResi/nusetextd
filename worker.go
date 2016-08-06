@@ -77,7 +77,7 @@ func (w Worker) DoWork(c *WorkerConfig) {
 			continue
 		}
 		as.Done(article)
-		err = rr.StoreTopicsReport(report)
+		err = rr.StoreTopics(report)
 		if err != nil {
 			logError.Println(err)
 		}
