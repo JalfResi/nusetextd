@@ -7,17 +7,17 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// Stores an TextRazorResult in a MySQL table
-
+// ReportRecorder stores an TextRazorResult in a MySQL table
 type ReportRecorder struct {
 	db *sql.DB
 }
 
+// NewReportRecorder is a ReportRecorder constructor
 func NewReportRecorder(mysqlHost, mysqlUsername, mysqlPassword string) *ReportRecorder {
 	return &ReportRecorder{}
 }
 
-// If there is an error executing any of the inserts, all pervious inserts
+// StoreTopics If there is an error executing any of the inserts, all pervious inserts
 // for this TextRazorResult is reolledback, ensuring we dont have a partial
 // TextRazorResult written to the database.
 func (rr *ReportRecorder) StoreTopics(r *TextRazorResult) error {

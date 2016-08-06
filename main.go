@@ -10,19 +10,19 @@ import (
 )
 
 const (
-	LOG_PREFIX_INFO  = "INFO "
-	LOG_PREFIX_ERROR = "ERROR "
+	logPrefixInfo  = "INFO "
+	logPrefixError = "ERROR "
 )
 
 var (
-	logInfo  *log.Logger = log.New(ioutil.Discard, LOG_PREFIX_INFO, log.Ldate|log.Ltime)
-	logError *log.Logger = log.New(os.Stderr, LOG_PREFIX_ERROR, log.Ldate|log.Ltime)
+	logInfo  = log.New(ioutil.Discard, logPrefixInfo, log.Ldate|log.Ltime)
+	logError = log.New(os.Stderr, logPrefixError, log.Ldate|log.Ltime)
 )
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-    fmt.Printf("NuseText is starting...\n")
+	fmt.Printf("NuseText is starting...\n")
 
 	if config.configTest {
 		flag.PrintDefaults()
@@ -41,7 +41,7 @@ func main() {
 	}
 
 	if config.verbose {
-		logInfo = log.New(os.Stdout, LOG_PREFIX_INFO, log.Ldate|log.Ltime)
+		logInfo = log.New(os.Stdout, logPrefixInfo, log.Ldate|log.Ltime)
 	}
 
 	if config.debug {

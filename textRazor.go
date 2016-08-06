@@ -32,11 +32,15 @@ const (
 )
 
 var (
-	ErrHTTPBadRequest            = errors.New("Bad Request")
-	ErrHTTPUnauthorized          = errors.New("Unauthorized")
+	// ErrHTTPBadRequest error
+	ErrHTTPBadRequest = errors.New("Bad Request")
+	// ErrHTTPUnauthorized error
+	ErrHTTPUnauthorized = errors.New("Unauthorized")
+	// ErrHTTPRequestEntityTooLarge error
 	ErrHTTPRequestEntityTooLarge = errors.New("Request Entity Too Large")
 )
 
+// TextRazorRequest struct
 type TextRazorRequest struct {
 	Text                 string `form:"text,omitempty"                url:"text,omitempty"                yaml:"text,omitempty"`
 	URL                  string `form:"url,omitempty"                 url:"url,omitempty"                 yaml:"url,omitempty"`
@@ -54,12 +58,14 @@ type TextRazorRequest struct {
 	EntitiesEnrichment   string `form:"entities.enrichment,omitempty" url:"entities.enrichment,omitempty" yaml:"entities.enrichment,omitempty"`
 }
 
+// NewTextRazorRequest is a TextRazorRequest constructor
 func NewTextRazorRequest(key string) *TextRazorRequest {
 	return &TextRazorRequest{
 		APIKey: key,
 	}
 }
 
+// Analysis method
 func (t *TextRazorRequest) Analysis(client *http.Client) (*TextRazorResult, error) {
 	v, err := query.Values(t)
 	if err != nil {
@@ -116,10 +122,12 @@ func (t *TextRazorRequest) String() string {
 	return string(b)
 }
 
+// SetExtractors method
 func (t *TextRazorRequest) SetExtractors(e ...string) {
 	t.Extractors = strings.Join(e, ",")
 }
 
+// TextRazorResult struct
 type TextRazorResult struct {
 	URL              string
 	Time             float64
@@ -132,6 +140,7 @@ type TextRazorResult struct {
 	RawText          string
 }
 
+// TextRazorResponse struct
 type TextRazorResponse struct {
 	Entailments        []TextRazorEntailment
 	Entities           []TypeRazorEntity
@@ -146,6 +155,7 @@ type TextRazorResponse struct {
 	LanguageIsReliable bool
 }
 
+// TypeRazorEntity struct
 type TypeRazorEntity struct {
 	EntityID        string
 	EntityEnglishID string
@@ -160,6 +170,7 @@ type TypeRazorEntity struct {
 	WikiLink        string
 }
 
+// TextRazorTopic struct
 type TextRazorTopic struct {
 	ID       int
 	Label    string
@@ -167,6 +178,7 @@ type TextRazorTopic struct {
 	WikiLink string
 }
 
+// TextRazorEntailment struct
 type TextRazorEntailment struct {
 	ContextScore  int
 	EntailedTree  string
@@ -175,25 +187,30 @@ type TextRazorEntailment struct {
 	Score         float64
 }
 
+// TextRazorRelationParam struct
 type TextRazorRelationParam struct {
 	WordPositions string
 	Relation      string
 }
 
+// TextRazorNounPhrase struct
 type TextRazorNounPhrase struct {
 	WordPositions string
 }
 
+// TextRazorProperty struct
 type TextRazorProperty struct {
 	WordPositions     string
 	PropertyPositions string
 }
 
+// TextRazorRelation struct
 type TextRazorRelation struct {
 	Params        string
 	WordPositions string
 }
 
+// TextRazorWord struct
 type TextRazorWord struct {
 	StartingPos      int
 	EndingPos        int
@@ -207,6 +224,7 @@ type TextRazorWord struct {
 	Token            string
 }
 
+// TextRazorSentence struct
 type TextRazorSentence struct {
 	Words string
 }

@@ -2,11 +2,13 @@ package main
 
 import "sync"
 
+// Stack struct
 type Stack struct {
 	sync.Mutex
 	stack []Worker
 }
 
+// Inc method
 func (s *Stack) Inc(count int) []Worker {
 	temp := make([]Worker, count)
 
@@ -21,6 +23,7 @@ func (s *Stack) Inc(count int) []Worker {
 	return temp
 }
 
+// Dec method
 func (s *Stack) Dec(count int) []Worker {
 	s.Lock()
 	defer s.Unlock()
@@ -38,6 +41,7 @@ func (s *Stack) Dec(count int) []Worker {
 	return n
 }
 
+// Len method
 func (s *Stack) Len() int {
 	s.Lock()
 	defer s.Unlock()

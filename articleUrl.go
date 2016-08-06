@@ -7,6 +7,7 @@ import (
 	beanstalk "github.com/JalfResi/gobeanstalk"
 )
 
+// ArticleURL struct
 type ArticleURL struct {
 	url   *url.URL
 	Hash  string
@@ -14,7 +15,8 @@ type ArticleURL struct {
 	stats *StatsJob
 }
 
-func NewArticleUrl(job *beanstalk.Job, stats *StatsJob) (*ArticleURL, error) {
+// NewArticleURL ArticleURL constructor
+func NewArticleURL(job *beanstalk.Job, stats *StatsJob) (*ArticleURL, error) {
 	u, parseErr := url.Parse(string(job.Body))
 	if parseErr != nil {
 		return nil, parseErr

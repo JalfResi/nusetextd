@@ -4,6 +4,7 @@ import (
 	beanstalk "github.com/JalfResi/gobeanstalk"
 )
 
+// WorkerConfig struct
 type WorkerConfig struct {
 	srcTube          string
 	destTube         string
@@ -16,6 +17,7 @@ type WorkerConfig struct {
 	mysqlPassword    string
 }
 
+// Worker chan
 type Worker chan struct{}
 
 // DoWork does the following:
@@ -50,7 +52,7 @@ func (w Worker) DoWork(c *WorkerConfig) {
 		article := as.GetArticleURL()
 		report, err := aa.Analyse(article)
 		if err != nil {
-			if err == requestLimitMet {
+			if err == ErrRequestLimitMet {
 				logError.Printf("%s: %d\n", err, config.totalRequestLimit)
 				w.DieGracefully()
 				// should possibly wait until the next day
@@ -84,6 +86,7 @@ func (w Worker) DoWork(c *WorkerConfig) {
 	}
 }
 
+// DieGracefully method
 func (w Worker) DieGracefully() {
 	close(w)
 }

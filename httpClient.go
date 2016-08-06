@@ -8,11 +8,13 @@ import (
 	"time"
 )
 
+// Config struct
 type Config struct {
 	ConnectTimeout   time.Duration
 	ReadWriteTimeout time.Duration
 }
 
+// TimeoutDialer function
 func TimeoutDialer(config *Config) func(net, addr string) (c net.Conn, err error) {
 	return func(netw, addr string) (net.Conn, error) {
 		conn, err := net.DialTimeout(netw, addr, config.ConnectTimeout)
@@ -24,6 +26,7 @@ func TimeoutDialer(config *Config) func(net, addr string) (c net.Conn, err error
 	}
 }
 
+// NewTimeoutClient timeout HTTP client constructor
 func NewTimeoutClient(args ...interface{}) *http.Client {
 	// Default configuration
 	config := &Config{

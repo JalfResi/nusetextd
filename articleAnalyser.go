@@ -7,20 +7,21 @@ import (
 	"time"
 )
 
-// Connects to TextRazor and outputs the returned result
-// in an AnalysisReport
+// ErrRequestLimitMet error
+var ErrRequestLimitMet = errors.New("Request limit met")
 
-var requestLimitMet = errors.New("Request limit met")
-
+// ArticleAnalyser interface
 type ArticleAnalyser interface {
 	Analyse(u *ArticleURL) *TextRazorResult
 }
 
+// Analyser struct
 type Analyser struct {
 	apiKey            string
 	downloadUserAgent string
 }
 
+// NewAnalyser Analyser constructor
 func NewAnalyser(key string) *Analyser {
 	return &Analyser{
 		apiKey:            key,
@@ -28,10 +29,11 @@ func NewAnalyser(key string) *Analyser {
 	}
 }
 
+// Analyse method
 func (a *Analyser) Analyse(u *ArticleURL) (*TextRazorResult, error) {
 
 	if config.RequestLimitMet() {
-		return nil, requestLimitMet
+		return nil, ErrRequestLimitMet
 	}
 
 	c := NewTimeoutClient(time.Duration(config.timeout) * time.Second)
@@ -53,5 +55,8 @@ func (a *Analyser) Analyse(u *ArticleURL) (*TextRazorResult, error) {
 		ExtractorSenses,
 	)
 
-	return tr.Analysis(c)
+	result, err := tr.Analysis(c)
+	config.IncRequestCount()
+
+	return result, err
 }

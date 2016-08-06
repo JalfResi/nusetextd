@@ -17,9 +17,9 @@ import (
 	"github.com/JalfResi/flagenv"
 )
 
+// NusefeedConfig struct
 // This must be mutex locked as multiple connections could be
 // modifying the config options
-
 type NusefeedConfig struct {
 	sync.Mutex
 	verbose             bool
@@ -37,25 +37,28 @@ type NusefeedConfig struct {
 	textRazorAPIKey     string
 }
 
+// IncRequestCount method
 func (c *NusefeedConfig) IncRequestCount() {
 	c.Lock()
 	defer c.Unlock()
 	c.currentRequestCount++
 }
 
+// RequestCount method
 func (c *NusefeedConfig) RequestCount() int {
 	c.Lock()
 	defer c.Unlock()
 	return c.currentRequestCount
 }
 
+// RequestLimitMet method
 func (c *NusefeedConfig) RequestLimitMet() bool {
 	c.Lock()
 	defer c.Unlock()
 	return (c.currentRequestCount >= c.totalRequestLimit)
 }
 
-var config *NusefeedConfig = &NusefeedConfig{}
+var config = &NusefeedConfig{}
 
 func init() {
 	config.Lock()
