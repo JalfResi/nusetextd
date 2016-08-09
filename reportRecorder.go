@@ -54,7 +54,7 @@ func (rr *ReportRecorder) StoreTopics(r *TextRazorResult) error {
 	}
 	defer stmtArticles.Close()
 
-	stmtTopics, err := tx.Prepare("INSERT IGNORE INTO topics (hash, label) VALUES( ?, ? )") // ? = placeholder
+	stmtTopics, err := tx.Prepare("INSERT IGNORE INTO topics (hash, label, score, wikiLink, wikidataId) VALUES( ?, ?, ?, ?, ? )") // ? = placeholder
 	if err != nil {
 		return err
 	}
@@ -68,30 +68,25 @@ func (rr *ReportRecorder) StoreTopics(r *TextRazorResult) error {
 
 	for _, topic := range r.Response.Topics {
 
-		if topic.Score == 1.0 {
+		articleURLHash := generateHash(r.URL)
+		topicHash := generateHash(topic.Label)
 
-			articleURLHash := generateHash(r.URL)
-			topicHash := generateHash(topic.Label)
+		_, err = stmtArticles.Exec(articleURLHash, r.URL)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 
-			_, err = stmtArticles.Exec(articleURLHash, r.URL)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
+		_, err = stmtTopics.Exec(topicHash, topic.Label, topic.Score, topic.WikiLink, topic.ID)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 
-			_, err = stmtTopics.Exec(topicHash, topic)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-
-			_, err = stmtArticlesHasTopics.Exec(articleURLHash, topicHash)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-
-			fmt.Println(topic)
+		_, err = stmtArticlesHasTopics.Exec(articleURLHash, topicHash)
+		if err != nil {
+			tx.Rollback()
+			return err
 		}
 	}
 

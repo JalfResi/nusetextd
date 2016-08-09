@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS articles (
 CREATE TABLE IF NOT EXISTS topics (
     hash BINARY(16) NOT NULL,
     label TINYTEXT,
+    score DOUBLE,
+    wikiLink TEXT,
+    wikidataId INT
     PRIMARY KEY (hash)    
 );
 
