@@ -46,7 +46,7 @@ func (w Worker) DoWork(c *WorkerConfig) {
 
 	as := NewArticleSupplier(bs, c.timeout, c.srcTube)
 	aa := NewAnalyser(config.textRazorAPIKey)
-	rr := NewReportRecorder(c.mysqlHost, c.mysqlUsername, c.mysqlPassword)
+	rr := NewMysqlReportRecorder(c.mysqlHost, c.mysqlUsername, c.mysqlPassword)
 
 	for {
 		article := as.GetArticleURL()
