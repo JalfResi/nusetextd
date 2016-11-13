@@ -15,6 +15,7 @@ type WorkerConfig struct {
 	mysqlHost        string
 	mysqlUsername    string
 	mysqlPassword    string
+	nsqHost          string
 }
 
 // Worker chan
@@ -46,7 +47,11 @@ func (w Worker) DoWork(c *WorkerConfig) {
 
 	as := NewArticleSupplier(bs, c.timeout, c.srcTube)
 	aa := NewAnalyser(config.textRazorAPIKey)
-	rr := NewMysqlReportRecorder(c.mysqlHost, c.mysqlUsername, c.mysqlPassword)
+	//rr := NewMysqlReportRecorder(c.mysqlHost, c.mysqlUsername, c.mysqlPassword)
+	rr, err := NewNsqReportRecorder(c.nsqHost)
+	if err != nil {
+		logError.Fatalf("NSQ connect failed: %s\n", err)
+	}
 
 	for {
 		article := as.GetArticleURL()

@@ -35,6 +35,7 @@ type NusefeedConfig struct {
 	totalRequestLimit   int
 	currentRequestCount int
 	textRazorAPIKey     string
+	nsqHost             string
 }
 
 // IncRequestCount method
@@ -75,6 +76,7 @@ func init() {
 	flag.IntVar(&config.initialWorkerCount, "workers", 2, "The initial worker count")
 	flag.IntVar(&config.totalRequestLimit, "requests", 500, "The maximum TextRazor requests in a 24hr period")
 	flag.StringVar(&config.textRazorAPIKey, "key", "", "The TextRazor API key")
+	flag.StringVar(&config.nsqHost, "nsq", "127.0.0.1:4150", "The NSQ hostname")
 
 	flagenv.Prefix = "NUSETEXT_"
 	flagenv.Parse()
@@ -92,5 +94,6 @@ func newWorkerConfig(c *NusefeedConfig) *WorkerConfig {
 		memcachedbHost:   c.memcachedbHost,
 		maxRetryAttempts: c.maxRetryAttempts,
 		timeout:          c.timeout,
+		nsqHost:          c.nsqHost,
 	}
 }
