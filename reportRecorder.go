@@ -48,13 +48,13 @@ func (rr *ReportRecorder) StoreTopics(r *TextRazorResult) error {
 		return err
 	}
 
-	stmtArticles, err := tx.Prepare("INSERT IGNORE INTO articles (hash, url) VALUES( ?, ? )") // ? = placeholder
+	stmtArticles, err := tx.Prepare("INSERT IGNORE INTO articles (url) VALUES( ? )") // ? = placeholder
 	if err != nil {
 		return err
 	}
 	defer stmtArticles.Close()
 
-	stmtTopics, err := tx.Prepare("INSERT IGNORE INTO topics (hash, label, score, wikiLink, wikidataId) VALUES( ?, ?, ?, ?, ? )") // ? = placeholder
+	stmtTopics, err := tx.Prepare("INSERT IGNORE INTO topics (label, score, wikiLink, wikidataId) VALUES( ?, ?, ?, ? )") // ? = placeholder
 	if err != nil {
 		return err
 	}

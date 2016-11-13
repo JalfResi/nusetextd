@@ -166,7 +166,7 @@ type TypeRazorEntity struct {
 	MatchingTokens  string
 	MatchedText     string
 	Data            string
-	RelevanceScore  int
+	RelevanceScore  float64
 	WikiLink        string
 }
 
