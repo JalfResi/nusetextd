@@ -55,7 +55,11 @@ func (a *Analyser) Analyse(u *ArticleURL) (*TextRazorResult, error) {
 		ExtractorSenses,
 	)
 
-	result, err := tr.Analysis(c)
+	data, err := tr.Fetch(c)
+	if err != nil {
+		return nil, err
+	}
+	result, err := tr.Analysis(data)
 	config.IncRequestCount()
 
 	return result, err

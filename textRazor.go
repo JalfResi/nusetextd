@@ -65,8 +65,8 @@ func NewTextRazorRequest(key string) *TextRazorRequest {
 	}
 }
 
-// Analysis method
-func (t *TextRazorRequest) Analysis(client *http.Client) (*TextRazorResult, error) {
+// Fetch method
+func (t *TextRazorRequest) Fetch(client *http.Client) ([]byte, error) {
 	v, err := query.Values(t)
 	if err != nil {
 		return nil, err
@@ -85,19 +85,6 @@ func (t *TextRazorRequest) Analysis(client *http.Client) (*TextRazorResult, erro
 		return nil, err
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var tr TextRazorResult
-	tr.URL = t.URL
-	err = json.Unmarshal(data, &tr)
-	if err != nil {
-		logInfo.Printf("%s\n", data)
-		return nil, err
-	}
-
 	switch resp.StatusCode {
 	case http.StatusBadRequest:
 		return nil, ErrHTTPBadRequest
@@ -105,6 +92,19 @@ func (t *TextRazorRequest) Analysis(client *http.Client) (*TextRazorResult, erro
 		return nil, ErrHTTPUnauthorized
 	case http.StatusRequestEntityTooLarge:
 		return nil, ErrHTTPRequestEntityTooLarge
+	}
+
+	return ioutil.ReadAll(resp.Body)
+}
+
+// Analysis method
+func (t *TextRazorRequest) Analysis(data []byte) (*TextRazorResult, error) {
+	var tr TextRazorResult
+	tr.URL = t.URL
+	err := json.Unmarshal(data, &tr)
+	if err != nil {
+		logInfo.Printf("%s\n", data)
+		return nil, err
 	}
 
 	if !tr.Ok {
