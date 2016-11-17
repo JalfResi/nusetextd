@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/google/go-querystring/query"
+	"go4.org/errorutil"
 	"gopkg.in/yaml.v2"
 )
 
@@ -66,7 +70,7 @@ func NewTextRazorRequest(key string) *TextRazorRequest {
 }
 
 // Fetch method
-func (t *TextRazorRequest) Fetch(client *http.Client) ([]byte, error) {
+func (t *TextRazorRequest) Fetch(client *http.Client) (io.Reader, error) {
 	v, err := query.Values(t)
 	if err != nil {
 		return nil, err
@@ -94,17 +98,42 @@ func (t *TextRazorRequest) Fetch(client *http.Client) ([]byte, error) {
 		return nil, ErrHTTPRequestEntityTooLarge
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	return resp.Body, nil
 }
 
 // Analysis method
-func (t *TextRazorRequest) Analysis(data []byte) (*TextRazorResult, error) {
+func (t *TextRazorRequest) Analysis(r io.Reader) (*TextRazorResult, error) {
 	var tr TextRazorResult
 	tr.URL = t.URL
-	err := json.Unmarshal(data, &tr)
-	if err != nil {
-		logInfo.Printf("%s\n", data)
-		return nil, err
+
+	dj := json.NewDecoder(r)
+	if err := dj.Decode(&tr); err != nil {
+		extra := ""
+		if serr, ok := err.(*json.SyntaxError); ok {
+
+			if s, ok := r.(io.Seeker); ok {
+				if _, serr := s.Seek(0, os.SEEK_SET); serr != nil {
+					log.Fatalf("seek error: %v", serr)
+				}
+			}
+
+			line, col, highlight := errorutil.HighlightBytePosition(r, serr.Offset)
+			extra = fmt.Sprintf(":\nError at line %d, column %d (file offset %d):\n%s",
+				line, col, serr.Offset, highlight)
+		} else if serr, ok := err.(*json.UnmarshalTypeError); ok {
+
+			if s, ok := r.(io.Seeker); ok {
+				if _, serr := s.Seek(0, os.SEEK_SET); serr != nil {
+					log.Fatalf("seek error: %v", serr)
+				}
+			}
+
+			line, col, highlight := errorutil.HighlightBytePosition(r, serr.Offset)
+			extra = fmt.Sprintf(":\nError at line %d, column %d (file offset %d):\n%s",
+				line, col, serr.Offset, highlight)
+		}
+		return nil, fmt.Errorf("error parsing JSON object %s\n%v",
+			extra, err)
 	}
 
 	if !tr.Ok {
@@ -160,13 +189,13 @@ type TypeRazorEntity struct {
 	EntityID        string
 	EntityEnglishID string
 	ConfidenceScore float64
-	Type            string
-	FreebaseTypes   string
+	Type            []string
+	FreebaseTypes   []string
 	FreebaseID      string
-	MatchingTokens  string
+	MatchingTokens  []int64
 	MatchedText     string
 	Data            string
-	RelevanceScore  int
+	RelevanceScore  float64
 	WikiLink        string
 }
 
@@ -180,34 +209,39 @@ type TextRazorTopic struct {
 
 // TextRazorEntailment struct
 type TextRazorEntailment struct {
-	ContextScore  int
-	EntailedTree  string
-	WordPositions string
-	PriorScore    string
+	ContextScore  float64
+	EntailedTree  TextRazorEntailedTree
+	WordPositions []int64
+	PriorScore    float64
 	Score         float64
+}
+
+// TextRazorEntailedTree struct
+type TextRazorEntailedTree struct {
+	Word string
 }
 
 // TextRazorRelationParam struct
 type TextRazorRelationParam struct {
-	WordPositions string
+	WordPositions []int64
 	Relation      string
 }
 
 // TextRazorNounPhrase struct
 type TextRazorNounPhrase struct {
-	WordPositions string
+	WordPositions []int64
 }
 
 // TextRazorProperty struct
 type TextRazorProperty struct {
-	WordPositions     string
-	PropertyPositions string
+	WordPositions     []int64
+	PropertyPositions []int64
 }
 
 // TextRazorRelation struct
 type TextRazorRelation struct {
-	Params        string
-	WordPositions string
+	Params        []TextRazorRelationParam
+	WordPositions []int64
 }
 
 // TextRazorWord struct
@@ -215,10 +249,10 @@ type TextRazorWord struct {
 	StartingPos      int
 	EndingPos        int
 	Lemma            string
-	ParentPosition   string
+	ParentPosition   int64
 	PartOfSpeech     string
-	Senses           string
-	Position         string
+	Senses           []TextRazorSense
+	Position         int64
 	RelationToParent string
 	Stem             string
 	Token            string
@@ -226,5 +260,11 @@ type TextRazorWord struct {
 
 // TextRazorSentence struct
 type TextRazorSentence struct {
-	Words string
+	Words []TextRazorWord
+}
+
+// TextRazorSense struct
+type TextRazorSense struct {
+	Synset string
+	Score  float64
 }
