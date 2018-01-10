@@ -1,6 +1,7 @@
 {
 	"ImportPath": "github.com/JalfResi/nusetextd",
-	"GoVersion": "go1.6",
+	"GoVersion": "go1.9",
+	"GodepVersion": "v79",
 	"Deps": [
 		{
 			"ImportPath": "github.com/JalfResi/flagenv",
@@ -8,7 +9,6 @@
 		},
 		{
 			"ImportPath": "github.com/JalfResi/gobeanstalk",
-			"Comment": "v0.3-10-g80a3454",
 			"Rev": "80a34547ab301d3b9921ea0f6cc546a760945002"
 		},
 		{
